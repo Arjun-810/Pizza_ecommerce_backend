@@ -13,7 +13,7 @@ class Ingredients(models.Model):
 class MenuItem(models.Model):
     id = models.AutoField(primary_key=True)
     imageUrl = models.URLField()
-    ingredients = models.ManyToManyField(Ingredients,null=True)
+    ingredients = models.ManyToManyField(Ingredients)
     item_name = models.CharField(max_length=100)
     soldOut = models.BooleanField(default=False)
     unitPrice = models.DecimalField(max_digits=10, decimal_places=2)
@@ -34,3 +34,15 @@ class User(AbstractUser):
         null=True,
         help_text="Optional. Usernames must be unique.",
     )
+    def __str__(self):
+        return self.name
+
+class ProductCart(models.Model):
+    cart_id = models.AutoField(primary_key=True)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE,null=True, related_name="user_cart")
+    item_id = models.ForeignKey(MenuItem, on_delete=models.CASCADE,null=True, related_name="product_cart")
+    quantity = models.PositiveIntegerField(null=False)
+
+    def __str__(self):
+        return self.user_id.name + " " + self.item_id.item_name
+    

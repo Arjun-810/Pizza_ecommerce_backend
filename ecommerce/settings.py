@@ -28,8 +28,17 @@ DEBUG = True
 
 AUTH_USER_MODEL = 'products.User'
 
-ALLOWED_HOSTS = ['*']
+CORS_ALLOW_ALL_ORIGINS = True
 
+CORS_ALLOW_CREDENTIALS = True
+
+SESSION_COOKIE_SAMESITE = "None"
+
+SESSION_COOKIE_SECURE = True
+
+SESSION_COOKIE_HTTPONLY = False
+
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -40,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'products',
 ]
@@ -47,8 +57,10 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'ecommerce.utils.DisableCSRFMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -75,19 +87,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',  # <-- UPDATED line
-#         'NAME': 'Ecommerce',                 # <-- UPDATED line
-#         'USER': 'root',                     # <-- UPDATED line
-#         'PASSWORD': 'Arjun@123',              # <-- UPDATED line
-#         'HOST': '127.0.0.1',                # <-- UPDATED line
-#         'PORT': '3306',
-#     }
-# }
 
 DATABASES = {
     'default': {

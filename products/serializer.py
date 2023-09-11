@@ -34,8 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
             "user_permissions",
             "last_name",
             "first_name",
-            "is_active",
-            "username",
+            "is_active"
         )
 
     def create(self, validated_data):
@@ -43,3 +42,13 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])
         user.save()
         return user
+    
+
+class CartSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(read_only = True, source='item_id.item_name')
+    item_image = serializers.URLField(read_only = True, source= 'item_id.imageUrl')
+    user_name = serializers.CharField(read_only = True, source='user_id.name')
+
+    class Meta:
+        model = ProductCart
+        fields = '__all__'
