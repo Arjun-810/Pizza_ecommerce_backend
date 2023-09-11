@@ -46,6 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class CartSerializer(serializers.ModelSerializer):
     item_name = serializers.CharField(read_only = True, source='item_id.item_name')
+    unit_price = serializers.CharField(read_only = True, source='item_id.unitPrice')
     item_image = serializers.URLField(read_only = True, source= 'item_id.imageUrl')
     user_name = serializers.CharField(read_only = True, source='user_id.name')
 
