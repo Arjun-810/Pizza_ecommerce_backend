@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+    backend:
+        volumes:
+            - .:/app
+        build:
+            context: .
+        ports:
+            - 8000:8000
+        container_name: backend
+        # Open and stall the container
+        command: ./manage.py runsslserver 0:8000
