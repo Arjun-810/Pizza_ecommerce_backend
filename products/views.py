@@ -36,10 +36,14 @@ class Register(APIView):
 
 class Login(APIView):
     def get(self, request):
-        user = get_object_or_404(User, id=request.session["id"])
-        user_srlz = UserSerializer(user)
-        return Response(user_srlz.data, status=status.HTTP_200_OK)
-    
+        try:
+            user = get_object_or_404(User, id=request.session["id"])
+            user_srlz = UserSerializer(user)
+            return Response(user_srlz.data, status=status.HTTP_200_OK)
+        except:
+            pass
+        return Response({"msg":""}, status=status.HTTP_401_UNAUTHORIZED)
+        
     def post(self, request):
         username = request.data['username']
         password = request.data['password']
@@ -64,7 +68,8 @@ class Logout(APIView):
 class CartView(APIView):
 
     def get(self,request):
-        cart_data = ProductCart.objects.all()
+        user = get_object_or_404(User, id=request.session["id"])
+        cart_data = ProductCart.objects.filter(user_id=user)
         srlz_data = CartSerializer(cart_data, many=True)
         return Response(srlz_data.data, status=status.HTTP_200_OK)
     
@@ -85,6 +90,19 @@ class CartView(APIView):
         except:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
     
+class CartMultiView(APIView):
+    
+    def post(self, request):
+        user = get_object_or_404(User, id=request.session["id"])
+        ProductCart.objects.filter(user_id = user).delete()
+        srlz_data = CartSerializer(data = request.data,many = True)
+        if srlz_data.is_valid():
+            srlz_data.save(user_id = user)
+            return Response({'msg':'Successfully added items in cart'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response(srlz_data.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class CartOperation(APIView):
     def put(self,request, pk):
         try:

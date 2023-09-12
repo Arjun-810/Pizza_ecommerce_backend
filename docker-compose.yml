@@ -7,7 +7,7 @@ services:
         build:
             context: .
         ports:
-            - 8000:8000
+            - 8888:8000
         container_name: backend
         # Open and stall the container
         command: ./manage.py runsslserver 0:8000
