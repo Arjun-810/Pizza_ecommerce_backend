@@ -132,16 +132,14 @@ class CartOperation(APIView):
 class SimpleCheckout(APIView):
     def post(self, request):
         response = request.data
-        print(response)
         try:
             data = stripe.checkout.Session.create(
                 line_items= response['items'],
                 mode="payment",
                 customer_email=response['email'],
-                success_url="http://localhost:3000/success",
-                cancel_url="http://localhost:3000/cancel",
+                success_url="https://pizza-hum.vercel.app/success",
+                cancel_url="https://pizza-hum.vercel.app/cancel",
             )
-            print(data)
             return Response({"data": data}, status=status.HTTP_201_CREATED)
         except:
             return Response({'msg': "Can't create session ID"}, status=status.HTTP_400_BAD_REQUEST)
