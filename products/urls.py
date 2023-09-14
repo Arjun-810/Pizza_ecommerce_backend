@@ -11,5 +11,7 @@ urlpatterns = [
     path('logout/', Logout.as_view(), name="user-logout"),
     path('cart/', CartView.as_view(), name="cart"),
     path('cart_add/', CartMultiView.as_view(), name="cart-add"),
-    path('cart_operation/<int:pk>', CartOperation.as_view(), name='cart-operation')
+    path('cart_operation/<int:pk>', CartOperation.as_view(), name='cart-operation'),
+    path('checkout/', SimpleCheckout.as_view(), name='checkout'),
+    path('saveOrder/', SaveOrder.as_view(), name="save-order")
 ]

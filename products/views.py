@@ -5,6 +5,10 @@ from rest_framework.response import Response
 from .models import *
 from products.serializer import *
 from django.contrib.auth import authenticate, login, logout
+import stripe
+
+
+stripe.api_key = "sk_test_51NptrYSDCWX9Q5liyQZxbcCaR3l0YkvOyBBfX7vCNaA6FKhGchPSvHqehaUlTxrd0Hja6BLZPAcd03CpcasGk4Jo006S1ESYUw"
 
 class MenuItemList(APIView):
     def get(self, request):
@@ -123,3 +127,27 @@ class CartOperation(APIView):
             return Response({'error': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
         cart.delete()
         return Response({'msg': 'Cart deleted successfully'}, status=status.HTTP_200_OK)
+    
+
+class SimpleCheckout(APIView):
+    def post(self, request):
+        response = request.data
+        print(response)
+        try:
+            data = stripe.checkout.Session.create(
+                line_items= response['items'],
+                mode="payment",
+                customer_email=response['email'],
+                success_url="http://localhost:3000/success",
+                cancel_url="http://localhost:3000/cancel",
+            )
+            print(data)
+            return Response({"data": data}, status=status.HTTP_201_CREATED)
+        except:
+            return Response({'msg': "Can't create session ID"}, status=status.HTTP_400_BAD_REQUEST)
+class SaveOrder(APIView):
+    def post(self, request):
+        response = request.data
+        session = stripe.checkout.Session.retrieve(response['session'])
+        print(session)
+        return Response({"data": session}, status=status.HTTP_200_OK)
