@@ -53,3 +53,35 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCart
         fields = '__all__'
+
+
+class OrderItemsSerializer(serializers.ModelSerializer):
+    unit_price = serializers.CharField(read_only = True, source='item_id.unitPrice')
+    item_image = serializers.URLField(read_only = True, source= 'item_id.imageUrl')
+    item_name = serializers.CharField(read_only = True, source='item_id.item_name')
+    class Meta:
+        model = OrderItem
+        fields = '__all__'
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    order_items = OrderItemsSerializer(many=True, source='order_map')
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+    def create(self, validated_data):
+        order_items_data = validated_data.pop('order_map')
+        order = Order.objects.create(**validated_data)
+
+        for item_data in order_items_data:
+            OrderItem.objects.create(order_id=order, **item_data)
+
+        return order
+    
+class OrderPutSerialier(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+    

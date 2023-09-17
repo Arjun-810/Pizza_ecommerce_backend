@@ -46,3 +46,23 @@ class ProductCart(models.Model):
     def __str__(self):
         return self.user_id.name + " " + self.item_id.item_name
     
+
+class Order(models.Model):
+    total_amount =  models.PositiveIntegerField(null=False)
+    contact_no = models.CharField(max_length=15, null= False)
+    client_name = models.CharField(max_length=50, null=False, blank=False)
+    delivery_address = models.CharField(max_length=150, null=False, blank=False)
+    order_status = models.CharField(max_length=15, null=False, default="PENDING")
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE,null=True, related_name="user_order")
+    stripe_session_id = models.CharField(max_length=150, null=True, blank=False)
+    def __str__(self):
+        return self.user_id.name + " " + self.order_status
+    
+class OrderItem(models.Model):
+    item_id = models.ForeignKey(MenuItem, on_delete=models.CASCADE,null=True, related_name="product_order")
+    quantity = models.PositiveIntegerField(null=False)
+    order_id = models.ForeignKey(Order, on_delete=models.CASCADE,null=True, related_name="order_map")
+
+
+    def __str__(self):
+        return self.order_id.client_name + " " + self.item_id.item_name

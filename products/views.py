@@ -130,6 +130,11 @@ class CartOperation(APIView):
     
 
 class SimpleCheckout(APIView):
+
+    def get(self, request):
+        order_data = Order.objects.filter(user_id = request.session["id"])
+        order_srlz = OrderSerializer(order_data, many = True)
+        return Response(order_srlz.data , status=status.HTTP_200_OK)
     def post(self, request):
         response = request.data
         try:
@@ -137,15 +142,35 @@ class SimpleCheckout(APIView):
                 line_items= response['items'],
                 mode="payment",
                 customer_email=response['email'],
-                success_url="https://pizza-hum.vercel.app/success",
-                cancel_url="https://pizza-hum.vercel.app/cancel",
+                success_url="http://127.0.0.1:3000/success",
+                cancel_url="http://127.0.0.1:3000/cancel",
             )
-            return Response({"data": data}, status=status.HTTP_201_CREATED)
+            order_data = {}
+            order_data['total_amount'] = data['amount_total']
+            order_data['contact_no'] = response['phone']
+            order_data['client_name'] = response['name']
+            order_data['delivery_address'] = response['address']
+            order_data['order_items'] = response['products']
+            order_data['stripe_session_id'] = data['id']
+            user = get_object_or_404(User, id=request.session["id"])
+            srlz_data = OrderSerializer(data = order_data)
+            if srlz_data.is_valid():
+                srlz_data.save(user_id = user)
+                print(data)
+                return Response({"data": data}, status=status.HTTP_201_CREATED)
+            return Response(srlz_data.errors, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({'msg': "Can't create session ID"}, status=status.HTTP_400_BAD_REQUEST)
+        
+
 class SaveOrder(APIView):
     def post(self, request):
         response = request.data
         session = stripe.checkout.Session.retrieve(response['session'])
-        print(session)
-        return Response({"data": session}, status=status.HTTP_200_OK)
+        data = Order.objects.get(stripe_session_id = response['session'])
+        srlz_data = OrderPutSerialier(instance=data, data={'order_status': session['payment_status']}, partial=True)
+        if srlz_data.is_valid():
+            srlz_data.save()
+            return Response({"data": session}, status=status.HTTP_200_OK)
+        return Response(srlz_data.errors, status=status.HTTP_400_BAD_REQUEST)
+
