@@ -157,8 +157,8 @@ class SimpleCheckout(APIView):
             line_items= response['items'],
             mode="payment",
             customer_email=response['email'],
-            success_url="https://pizza-hum.vercel.app/success",
-            cancel_url="https://pizza-hum.vercel.app/cancel",
+            success_url="http://localhost:3000/success",
+            cancel_url="http://localhost:3000/cancel",
         )
         order_data = {}
         order_data['total_amount'] = data['amount_total']
@@ -184,7 +184,7 @@ class SaveOrder(APIView):
         srlz_data = OrderPutSerialier(instance=data, data={'order_status': session['payment_status']}, partial=True)
         if srlz_data.is_valid():
             srlz_data.save()
-            cart = ProductCart.objects.get(user_id = request.session['id']).delete()
+            cart = ProductCart.objects.filter(user_id = request.session['id']).delete()
             return Response({"data": session}, status=status.HTTP_200_OK)
         return Response(srlz_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
