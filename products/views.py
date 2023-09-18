@@ -82,12 +82,16 @@ class Logout(APIView):
 class CartView(APIView):
 
     def get(self,request):
+        if "id" not in request.session:
+            return Response({'error': 'User not Login'}, status=status.HTTP_401_UNAUTHORIZED)
         user = get_object_or_404(User, id=request.session["id"])
         cart_data = ProductCart.objects.filter(user_id=user)
         srlz_data = CartSerializer(cart_data, many=True)
         return Response(srlz_data.data, status=status.HTTP_200_OK)
     
     def post(self, request):
+        if "id" not in request.session:
+            return Response({'error': 'User not Login'}, status=status.HTTP_401_UNAUTHORIZED)
         user = get_object_or_404(User, id=request.session["id"])
         srlz_data = CartSerializer(data = request.data)
         if srlz_data.is_valid():
@@ -197,7 +201,8 @@ class SaveOrder(APIView):
         srlz_data = OrderPutSerialier(instance=data, data={'order_status': session['payment_status']}, partial=True)
         if srlz_data.is_valid():
             srlz_data.save()
-            cart = ProductCart.objects.filter(user_id = request.session['id']).delete()
+            if "id" in request.session:
+                cart = ProductCart.objects.filter(user_id = request.session['id']).delete()
             return Response({"data": session}, status=status.HTTP_200_OK)
         return Response(srlz_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
