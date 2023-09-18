@@ -27,6 +27,14 @@ class Register(APIView):
     def post(self, request):
         user_exist = User.objects.filter(username = request.data['username']).exists()
         if user_exist:
+            user_inactive = User.objects.filter(username = request.data['username'],is_active = 0).exists()
+            if user_inactive:
+                data = User.objects.get(username = request.data['username'],is_active = 0)
+                request.data["is_active"] = 1
+                srlz_data = UserSerializer(instance=data, data=request.data, partial=True)
+                if srlz_data.is_valid():
+                    srlz_data.save()
+                return Response({'msg': 'User Successfully Creadted'})
             return Response({'msg': 'User already exist'}, status=status.HTTP_400_BAD_REQUEST)
         user_srlz = UserSerializer(data=request.data)
         if user_srlz.is_valid():
@@ -47,10 +55,9 @@ class Login(APIView):
         return Response({"msg":""}, status=status.HTTP_401_UNAUTHORIZED)
         
     def post(self, request):
-        print(request.data['username'])
         username = request.data['username']
         password = request.data['password']
-        user = authenticate(username=username, password=password)
+        user = authenticate(username=username, password=password,is_active = 1)
         if user is not None:
             login(request, user)
             request.session["id"] = request.user.id
@@ -141,11 +148,13 @@ class SimpleCheckout(APIView):
             if user_exist:
                 pass
             else:
+                print("test ")
                 user_data = {}
                 user_data['name'] = response['name']
                 user_data['username'] = request.data['email']
                 user_data['contact_number'] = request.data['phone']
                 user_data['password'] = "123"
+                user_data['is_active'] = 0
                 user_srlz = UserSerializer(data=user_data)
                 if user_srlz.is_valid():
                     user_srlz.save()

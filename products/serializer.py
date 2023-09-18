@@ -34,7 +34,6 @@ class UserSerializer(serializers.ModelSerializer):
             "user_permissions",
             "last_name",
             "first_name",
-            "is_active"
         )
 
     def create(self, validated_data):
@@ -42,6 +41,20 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])
         user.save()
         return user
+    
+    def update(self, instance, validated_data):
+        # Remove the 'password' field from validated_data if it's not provided in the request
+        password = validated_data.pop('password', None)
+
+        # Update the instance with the remaining validated_data
+        instance = super(UserSerializer, self).update(instance, validated_data)
+
+        # Set the password if it's provided
+        if password is not None:
+            instance.set_password(password)
+            instance.save()
+
+        return instance
     
 
 class CartSerializer(serializers.ModelSerializer):

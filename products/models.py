@@ -27,6 +27,7 @@ class MenuItem(models.Model):
 class User(AbstractUser):
     contact_number = models.CharField(max_length=15)
     name = models.CharField(max_length=150, null=True, blank=False)
+    is_active = models.IntegerField(default=1)
     username = models.CharField(
         max_length=150,
         unique=True,
