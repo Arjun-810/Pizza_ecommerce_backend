@@ -49,7 +49,9 @@ class Login(APIView):
         try:
             user = get_object_or_404(User, id=request.session["id"])
             user_srlz = UserSerializer(user)
-            return Response(user_srlz.data, status=status.HTTP_200_OK)
+            data = user_srlz.data
+            data["email"] = data['username']
+            return Response(data, status=status.HTTP_200_OK)
         except:
             pass
         return Response({"msg":""}, status=status.HTTP_401_UNAUTHORIZED)
@@ -63,7 +65,9 @@ class Login(APIView):
             request.session["id"] = request.user.id
             user = User.objects.get(id = request.user.id)
             srlz = UserSerializer(user)
-            return Response(srlz.data, status=status.HTTP_200_OK)
+            data = srlz.data
+            data["email"] = data['username']
+            return Response(data, status=status.HTTP_200_OK)
         else:
             return Response({'msg':'User Not found with this credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
