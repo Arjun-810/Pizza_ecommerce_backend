@@ -47,6 +47,7 @@ class Login(APIView):
         return Response({"msg":""}, status=status.HTTP_401_UNAUTHORIZED)
         
     def post(self, request):
+        print(request.data['username'])
         username = request.data['username']
         password = request.data['password']
         user = authenticate(username=username, password=password)
@@ -135,13 +136,13 @@ class SimpleCheckout(APIView):
         return Response(order_srlz.data , status=status.HTTP_200_OK)
     def post(self, request):
         response = request.data
-        if id not in request.session:
+        if "id" not in request.session:
             user_exist = User.objects.filter(username = request.data['email']).exists()
             if user_exist:
                 pass
             else:
                 user_data = {}
-                user_data['name'] = "Arjun Sharma"
+                user_data['name'] = response['name']
                 user_data['username'] = request.data['email']
                 user_data['contact_number'] = request.data['phone']
                 user_data['password'] = "123"
@@ -159,18 +160,16 @@ class SimpleCheckout(APIView):
             success_url="https://pizza-hum.vercel.app/success",
             cancel_url="https://pizza-hum.vercel.app/cancel",
         )
-        print(data)
         order_data = {}
         order_data['total_amount'] = data['amount_total']
         order_data['contact_no'] = response['phone']
-        order_data['client_name'] = "Arjun"
+        order_data['client_name'] = response['name']
         order_data['delivery_address'] = response['address']
         order_data['order_items'] = response['products']
         order_data['stripe_session_id'] = data['id']
         srlz_data = OrderSerializer(data = order_data)
         if srlz_data.is_valid():
             srlz_data.save(user_id = user)
-            print(data)
             return Response({"data": data}, status=status.HTTP_201_CREATED)
         return Response(srlz_data.errors, status=status.HTTP_400_BAD_REQUEST)
         # except:
