@@ -156,8 +156,8 @@ class SimpleCheckout(APIView):
             line_items= response['items'],
             mode="payment",
             customer_email=response['email'],
-            success_url="http://127.0.0.1:3000/success",
-            cancel_url="http://127.0.0.1:3000/cancel",
+            success_url="https://pizza-hum.vercel.app/success",
+            cancel_url="https://pizza-hum.vercel.app/cancel",
         )
         print(data)
         order_data = {}
