@@ -25,11 +25,9 @@ class Register(APIView):
         return Response(user_srlz.data , status=status.HTTP_200_OK)
     
     def post(self, request):
-        print("data222 = ",request.data)
         user_exist = User.objects.filter(username = request.data['username']).exists()
         if user_exist:
             return Response({'msg': 'User already exist'}, status=status.HTTP_400_BAD_REQUEST)
-        print("data = ",request.data)
         user_srlz = UserSerializer(data=request.data)
         if user_srlz.is_valid():
             user_srlz.save()
@@ -137,30 +135,46 @@ class SimpleCheckout(APIView):
         return Response(order_srlz.data , status=status.HTTP_200_OK)
     def post(self, request):
         response = request.data
-        try:
-            data = stripe.checkout.Session.create(
-                line_items= response['items'],
-                mode="payment",
-                customer_email=response['email'],
-                success_url="http://127.0.0.1:3000/success",
-                cancel_url="http://127.0.0.1:3000/cancel",
-            )
-            order_data = {}
-            order_data['total_amount'] = data['amount_total']
-            order_data['contact_no'] = response['phone']
-            order_data['client_name'] = response['name']
-            order_data['delivery_address'] = response['address']
-            order_data['order_items'] = response['products']
-            order_data['stripe_session_id'] = data['id']
+        if id not in request.session:
+            user_exist = User.objects.filter(username = request.data['email']).exists()
+            if user_exist:
+                pass
+            else:
+                user_data = {}
+                user_data['name'] = "Arjun Sharma"
+                user_data['username'] = request.data['email']
+                user_data['contact_number'] = request.data['phone']
+                user_data['password'] = "123"
+                user_srlz = UserSerializer(data=user_data)
+                if user_srlz.is_valid():
+                    user_srlz.save()
+            user = get_object_or_404(User, username = request.data['email'])
+        else:
             user = get_object_or_404(User, id=request.session["id"])
-            srlz_data = OrderSerializer(data = order_data)
-            if srlz_data.is_valid():
-                srlz_data.save(user_id = user)
-                print(data)
-                return Response({"data": data}, status=status.HTTP_201_CREATED)
-            return Response(srlz_data.errors, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({'msg': "Can't create session ID"}, status=status.HTTP_400_BAD_REQUEST)
+        # try:
+        data = stripe.checkout.Session.create(
+            line_items= response['items'],
+            mode="payment",
+            customer_email=response['email'],
+            success_url="http://127.0.0.1:3000/success",
+            cancel_url="http://127.0.0.1:3000/cancel",
+        )
+        print(data)
+        order_data = {}
+        order_data['total_amount'] = data['amount_total']
+        order_data['contact_no'] = response['phone']
+        order_data['client_name'] = "Arjun"
+        order_data['delivery_address'] = response['address']
+        order_data['order_items'] = response['products']
+        order_data['stripe_session_id'] = data['id']
+        srlz_data = OrderSerializer(data = order_data)
+        if srlz_data.is_valid():
+            srlz_data.save(user_id = user)
+            print(data)
+            return Response({"data": data}, status=status.HTTP_201_CREATED)
+        return Response(srlz_data.errors, status=status.HTTP_400_BAD_REQUEST)
+        # except:
+        #     return Response({'msg': "Can't create session ID"}, status=status.HTTP_400_BAD_REQUEST)
         
 
 class SaveOrder(APIView):
@@ -171,6 +185,7 @@ class SaveOrder(APIView):
         srlz_data = OrderPutSerialier(instance=data, data={'order_status': session['payment_status']}, partial=True)
         if srlz_data.is_valid():
             srlz_data.save()
+            cart = ProductCart.objects.get(user_id = request.session['id']).delete()
             return Response({"data": session}, status=status.HTTP_200_OK)
         return Response(srlz_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
