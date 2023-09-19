@@ -184,6 +184,7 @@ class SimpleCheckout(APIView):
         order_data['delivery_address'] = response['address']
         order_data['order_items'] = response['products']
         order_data['stripe_session_id'] = data['id']
+        order_data['is_priority'] = response['priority']
         srlz_data = OrderSerializer(data = order_data)
         if srlz_data.is_valid():
             srlz_data.save(user_id = user)
@@ -203,6 +204,6 @@ class SaveOrder(APIView):
             srlz_data.save()
             if "id" in request.session:
                 cart = ProductCart.objects.filter(user_id = request.session['id']).delete()
-            return Response({"data": session}, status=status.HTTP_200_OK)
+            return Response({"data": srlz_data.data}, status=status.HTTP_200_OK)
         return Response(srlz_data.errors, status=status.HTTP_400_BAD_REQUEST)
 
