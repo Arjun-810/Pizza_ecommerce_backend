@@ -17,6 +17,10 @@ oauth.register(
     name="google",
 )
 
+oauth.register(
+    name="facebook",
+)
+
 
 stripe.api_key = "sk_test_51NptrYSDCWX9Q5liyQZxbcCaR3l0YkvOyBBfX7vCNaA6FKhGchPSvHqehaUlTxrd0Hja6BLZPAcd03CpcasGk4Jo006S1ESYUw"
 

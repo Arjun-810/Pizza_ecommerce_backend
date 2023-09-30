@@ -148,8 +148,10 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
     "Access-Control-Allow-Origin",
+    "ngrok-skip-browser-warning",
 ]
 
+OAUTH_REDIRECT_URL = "https://pizzafront.thecv.in/socialAuth/{provider}/"
 
 AUTHLIB_OAUTH_CLIENTS = {
     "google": {
@@ -157,7 +159,20 @@ AUTHLIB_OAUTH_CLIENTS = {
         "client_secret": "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",
         "client_kwargs": {"scope": "openid email profile"},
         "server_metadata_url": "https://accounts.google.com/.well-known/openid-configuration",
-    }
+    },
+    "facebook": {
+        "client_id": "175916235489691",
+        "client_secret": "615380b73d47448afff4b62c50426ab5",
+        "client_kwargs": {"scope": "openid email"},
+        "server_metadata_url": "https://www.facebook.com/.well-known/openid-configuration",
+        # Need to implement these custom urls because openid-config doesn't include these urls.
+        "api_base_url": "https://graph.facebook.com/v9.0/",
+        "access_token_url": "https://graph.facebook.com/v9.0/oauth/access_token",
+        "access_token_params": None,
+        "authorize_url": "https://www.facebook.com/v9.0/dialog/oauth",
+        "authorize_params": None,
+        # Ref:
+        # https://docs.authlib.org/en/latest/client/frameworks.html#parsing-id-token
+        "jwks_uri": "https://www.facebook.com/.well-known/oauth/openid/jwks/",
+    },
 }
-
-OAUTH_REDIRECT_URL = "https://pizzafront.thecv.in/socialAuth/{provider}/"
